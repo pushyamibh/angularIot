@@ -1,0 +1,187 @@
+<section id="dashboard">
+  <div class="container-fluid">
+    <div class="card mt-4">
+      <div class="card-body">
+        <div class="col-12 mt-3">
+
+          <form [formGroup]="form">
+            <div class="row">
+              <div class="col-md-4 form-group">
+                <label>From Date</label>
+                <input type="text" class="form-control" bsDatepicker [bsValue]="bsRangeValue" placeholder="DD/MM/YYYY"
+                  formControlName="fromdate" (bsValueChange)="onDateChange($event)"
+                  [bsConfig]="{ rangeInputFormat : 'DD/MM/YYYY', dateInputFormat: 'DD/MM/YYYY', showWeekNumbers: false,adaptivePosition: true}">
+              </div>
+
+              <div class="col-md-4 form-group">
+                <label>To Date</label>
+                <input type="text" class="form-control" bsDatepicker [bsValue]="bsRangeValue" placeholder="DD/MM/YYYY"
+                  formControlName="todate" (bsValueChange)="onDateChange_to($event)"
+                  [bsConfig]="{ rangeInputFormat : 'DD/MM/YYYY', dateInputFormat: 'DD/MM/YYYY', showWeekNumbers: false,adaptivePosition: true}">
+              </div>
+
+              <div class="col-md-4 form-group">
+                <label class="required">Farm ID</label>
+                <ng-multiselect-dropdown  formControlName="farmid" [settings]="CF.SDDL_A"
+                [placeholder]="'Select'" [data]="Farmer_IDS" (onSelect)="onItemSelect($event)"
+                (onDeSelect)="onItemDeSelect($event)">
+              </ng-multiselect-dropdown>
+              <div *ngIf="Submitted && form.get('farmid').hasError('required')"
+              class="invalid" > Farm Id is required
+            </div>
+              </div>
+
+              <div class="col-md-4 form-group">
+                <label>Mac ID</label>
+                <ng-multiselect-dropdown  formControlName="macID" [settings]="CF.SDDL_A"
+                [placeholder]="'Select'" [data]="macIDS" (onSelect)="onItemSelect_mac($event)"
+                (onDeSelect)="onItemDeSelect_mac($event)">
+              </ng-multiselect-dropdown>
+              </div>
+              <div class="col-md-4 form-group">
+                <label>Device ID</label>
+                <ng-multiselect-dropdown  formControlName="deviceID" [settings]="CF.SDDL_A"
+                [placeholder]="'Select'" [data]="deviceIDS" (onSelect)="onItemSelect_device($event)"
+                (onDeSelect)="onItemDeSelect_device($event)">
+              </ng-multiselect-dropdown>
+              </div>
+
+              <div class="col-md-4 form-group">
+                <label class="required">Reading Type</label>
+                <ng-multiselect-dropdown  formControlName="readingtype" [settings]="CF.SDDL_A"
+                [placeholder]="'Select'" [data]="Reading_Types" (onSelect)="onItemSelect_reading($event)"
+                (onDeSelect)="onItemDeSelect_reading($event)">
+              </ng-multiselect-dropdown>
+              <div *ngIf="Submitted && form.get('readingtype').hasError('required')"
+             class="invalid" >Reading type is required
+            </div>
+              </div>
+            </div>
+            <div class="row ">
+              <div class="col-12 form-group text-center mt-4">
+                  <button  type="submit" class="btn btn-primary m-3" [ngClass]="{'button--loading':Btnsuccess }"
+                  (click)="Submit()"><span>Submit</span></button>
+                  <button  type="reset" class="btn btn-primary m-3 " 
+                  (click)="Clear()"><span>Clear</span></button>
+                </div>
+            </div>
+          </form>
+
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</section>
+
+
+<section id="tabledata">
+  <div class="container-fluid">
+    <ng-container *ngIf="!Main_data.length && NoOrders">
+      <h3 class="mt-3"><b>GETTING Data</b></h3>
+      <p>Please wait..</p>
+      <div class="animated-background mb-3" *ngFor="let x of [].constructor(8)"></div>
+  </ng-container>
+
+  <h3 *ngIf="!Main_data.length && NoData && !NoOrders">NO Data Found.....!</h3>
+  <div class="card mb-5" *ngIf="Main_data.length && !NoOrders">
+    <div class="card-body">
+      <div class="mt-3">
+        <div style="float:center">
+            <button class="btn btn-success float-right" (click)="open(mymodal)">check</button>
+        </div>
+    </div>
+        <div class="responsiveTable">
+          <table datatable [dtOptions]="CF.dtOptions">
+            <thead>
+              <tr>
+                <th>Sno</th>
+                  <th  *ngFor="let heading of header" class="border-top-0">{{heading}}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let team of Main_data, let i=index">
+                <td>{{i+1}}</td>
+                <ng-container *ngFor="let heading of header">
+                  <td *ngIf=" heading!=='transdate'">{{team[heading]}}</td>
+                  <td *ngIf="heading==='transdate'" style="width: 200.762px;">{{team.transdate | date:'dd/MM/yyyy'}}
+                     &nbsp;&nbsp; {{team.transdate | date:'h : mm : ss a'}}</td>
+                  <!-- <td *ngIf="heading==='jsondata'">
+                     <table>
+                      <tr>
+                        <th *ngFor="let josn_head of Object.keys(json.parse(team[heading]))"></th>
+
+                      </tr>
+                    </table>
+                  </td> -->
+                </ng-container>
+              </tr>
+            </tbody>
+          </table>
+
+        </div>
+    </div>
+  </div>
+
+
+  </div>
+</section>
+
+
+
+<ng-template #mymodal let-modal>
+
+  <div class="modal-header text-center bg-light">
+    <h4 class="modal-title w-100"><strong>Data Filtering</strong></h4>
+    <button type="button" class="close border bg-light" aria-label="Close" (click)="modal.dismiss('Cross click')">
+        <span aria-hidden="true" >&times;</span>
+    </button>
+</div>
+
+
+  <div class="modal-body">
+    <form (submit)="filterById()">
+    
+      <ng-template1 *ngFor="let type of DropDown;index as i">
+        <div class="h6">{{type}} :</div>
+        <div class="row">
+        <div class="from-group col-md-6">
+          <label>
+            <input type="number" name="min[i]" id="min[i]" [(ngModel)]="filterJson.min[i]"  placeholder="Min"/>
+          </label>
+        </div>
+        <div class="from-group col-md-6">
+          <label>
+            <input type="number" name="max[i]" id="max[i]" [(ngModel)]="filterJson.max[i]" placeholder="Max" />
+          </label>
+        </div>
+      </div>
+      </ng-template1>
+    <div class="modal-footer">
+      <button class="btn btn-primary"  type="submit">Filter by ID</button>
+    <button class="btn btn-primary" type="submit" (click)="resetFilter()">Reset</button>
+    </div>
+
+</form>
+</div>
+
+
+</ng-template>
+<ng-container *ngIf="Submitted">
+<h1 style="text-align:center">Urban kisaan Ph & EC Histogram </h1>
+<div class="row">
+<div class="table-responsive col-md-6">
+<div id="Ph"></div>
+</div>
+<hr>
+<div class="table-responsive col-md-6">
+<div id="Ec"></div>
+</div>
+</div>
+<br/>
+<h1 style="text-align:center">Urban kisaan date line graph </h1>
+<div id="container"></div>
+
+</ng-container>
+
